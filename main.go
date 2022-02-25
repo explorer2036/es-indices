@@ -17,8 +17,9 @@ import (
 )
 
 var (
-	url  = flag.String("url", "http://103.71.173.107:9200", "the elasticsearch url")
-	days = flag.Int("days", 3, "indices retention days")
+	url    = flag.String("url", "http://103.71.173.51:9200", "the elasticsearch url")
+	days   = flag.Int("days", 3, "indices retention days")
+	direct = flag.Bool("direct", false, "clean the indices now")
 )
 
 type Indice struct {
@@ -38,7 +39,7 @@ func deleteIndices() error {
 	es, err := elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{*url},
 		Username:  "elastic",
-		Password:  "cejfFqRVMvuJMprlSRv3",
+		Password:  "yYeAW3aJOGptkYp5I4f0",
 	})
 	if err != nil {
 		return fmt.Errorf("new es client: %w", err)
@@ -77,6 +78,15 @@ func deleteIndices() error {
 }
 
 func main() {
+	flag.Parse()
+
+	if *direct {
+		if err := deleteIndices(); err != nil {
+			log.Println(err)
+		}
+		return
+	}
+
 	newCron := cron.New()
 	newCron.AddFunc("@daily", func() {
 		if err := deleteIndices(); err != nil {
